@@ -1,0 +1,21 @@
+{
+  "name": "bd-jobs-discord-alert",
+  "version": "1.0.0",
+  "description": "Daily automated Discord alerts for Frontend and Full-Stack developer jobs in Bangladesh via GitHub Actions",
+  "type": "module",
+  "main": "index.mjs",
+  "scripts": {
+    "start": "node index.mjs",
+    "test:dry": "node -e \"process.env.DRY_RUN='true'; import('./index.mjs')\""
+  },
+  "keywords": [
+    "job-alerts",
+    "bangladesh",
+    "frontend",
+    "full-stack",
+    "discord-webhook",
+    "github-actions"
+  ],
+  "author": "Novo1999",
+  "license": "MIT"
+}

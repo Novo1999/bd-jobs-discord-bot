@@ -1,0 +1,26 @@
+name: Daily Job Alert to Discord (7:00 PM BST)
+
+on:
+  schedule:
+    # 7:00 PM BST (Bangladesh Standard Time, UTC+6) is 13:00 UTC
+    - cron: '0 13 * * *'
+  workflow_dispatch: # Allows manual trigger anytime from GitHub Actions tab
+
+jobs:
+  alert:
+    name: Crawl & Send Job Alert
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Run Job Alert Script
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: node index.mjs
