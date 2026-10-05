@@ -23,6 +23,5 @@ jobs:
       - name: Run Job Alert Script
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          GOOGLE_SEARCH_API_KEY: ${{ secrets.GOOGLE_SEARCH_API_KEY }}
-          GOOGLE_SEARCH_CX: ${{ secrets.GOOGLE_SEARCH_CX }}
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
         run: node index.mjs

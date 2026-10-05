@@ -8,7 +8,7 @@ Automated daily Discord notifier for Frontend and Full-Stack developer positions
 - **Multi-Source Scraping & Aggregation:**
   - 🟢 **LinkedIn:** Direct scraping via public guest search (extracts live Frontend & Full-Stack postings without requiring login/cookies).
   - 🔵 **BDTechJobs:** Live API integration for Dhaka tech firms (MERN, React, Next.js, Node.js).
-  - 🔷 **Facebook Groups & LinkedIn Posts:** Scrapes indexed social posts via Google Search.
+  - 🔷 **Facebook Groups & LinkedIn Posts:** Searches recent social posts via the free Tavily Search API.
   - 🟣 **Worldwide Remote:** Remote developer circulars open to Asian/Worldwide applicants (Jobicy).
 - **Rich Discord Embeds:** Posts organized cards with company name, location, work type (Onsite/Hybrid/Remote), required tech stack, and direct apply links.
 - **Deduplication Engine:** Automatically cleans and removes duplicate job listings.
@@ -34,9 +34,14 @@ Automated daily Discord notifier for Frontend and Full-Stack developer positions
 4. Set:
    - **Name:** `DISCORD_WEBHOOK_URL`
    - **Secret:** *[Paste your copied Discord Webhook URL]*
-5. *(Optional)* To enable Google-indexed Facebook/LinkedIn post scraping:
-   - `GOOGLE_SEARCH_API_KEY`: Your free Google Custom Search API Key
-   - `GOOGLE_SEARCH_CX`: Your Custom Search Engine ID
+5. *(Optional)* To enable Facebook group & LinkedIn post scraping, add `TAVILY_API_KEY` (see below).
+
+### 3. (Optional) Get a free Tavily API key for social posts
+1. Sign up at [tavily.com](https://tavily.com) — the free **Researcher** plan gives 1,000 searches/month with no credit card.
+2. Copy your API key (starts with `tvly-`) from the dashboard.
+3. Add it as a repository secret named `TAVILY_API_KEY`.
+
+The bot uses 2 searches per run (~60/month), well within the free quota.
 
 ---
 

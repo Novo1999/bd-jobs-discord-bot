@@ -6,14 +6,13 @@
  * Scrapes:
  * 1. LinkedIn Jobs (via public guest jobs endpoint - no login required)
  * 2. BDTechJobs API (Bangladesh tech vacancies)
- * 3. Facebook & LinkedIn Posts (via Google Custom Search API, if configured)
+ * 3. Facebook & LinkedIn Posts (via Tavily Search API free tier, if configured)
  * 4. Worldwide Remote Jobs (Jobicy)
  */
 
 const WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
 const IS_DRY_RUN = process.env.DRY_RUN === 'true' || !WEBHOOK_URL;
-const GOOGLE_API_KEY = process.env.GOOGLE_SEARCH_API_KEY;
-const GOOGLE_CX = process.env.GOOGLE_SEARCH_CX;
+const TAVILY_API_KEY = process.env.TAVILY_API_KEY;
 
 const cleanText = (s) => (s ? s.replace(/<[^>]+>/g, '').trim().replace(/\s+/g, ' ') : '');
 
@@ -152,60 +151,70 @@ async function fetchBDTechJobs() {
 }
 
 /**
- * 3. Scrape Facebook Groups & LinkedIn Posts via Google Custom Search API
+ * 3. Scrape Facebook Groups & LinkedIn Posts via Tavily Search API
+ * Free "Researcher" plan: 1,000 credits/month, no card. Each basic search = 1 credit (~60/month here).
  */
-async function fetchGoogleSocialPosts() {
-  if (!GOOGLE_API_KEY || !GOOGLE_CX) {
-    console.log('[Google Social] API Key or CX not provided; skipping Google index search for social posts.');
+async function fetchSocialPosts() {
+  if (!TAVILY_API_KEY) {
+    console.log('[Tavily] API key not provided; skipping social post search.');
     return [];
   }
 
   const queries = [
     {
-      q: 'site:facebook.com/groups/techjobsbd ("frontend" OR "full stack" OR "react" OR "hiring")',
+      query: 'TECH JOBS BD hiring frontend OR "full stack" OR react developer Bangladesh',
+      domain: 'facebook.com',
+      urlMustInclude: '/groups/',
       source: 'Facebook Group Post',
     },
     {
-      q: 'site:linkedin.com/posts ("hiring" OR "vacancy") ("frontend" OR "full stack") ("Dhaka" OR "Bangladesh")',
+      query: 'hiring frontend OR "full stack" developer Dhaka Bangladesh',
+      domain: 'linkedin.com',
+      urlMustInclude: '/posts/',
       source: 'LinkedIn Post',
     },
   ];
 
   const results = [];
-  for (const { q, source } of queries) {
+  for (const { query, domain, urlMustInclude, source } of queries) {
     try {
-      const url = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_API_KEY}&cx=${GOOGLE_CX}&q=${encodeURIComponent(
-        q
-      )}&dateRestrict=d2`;
-      const res = await fetch(url);
+      const res = await fetch('https://api.tavily.com/search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${TAVILY_API_KEY}`,
+        },
+        body: JSON.stringify({
+          query,
+          search_depth: 'basic',
+          include_domains: [domain],
+          time_range: 'week',
+          max_results: 10,
+          include_published_date: true,
+        }),
+      });
       if (!res.ok) {
-        let errMsg = '';
-        try {
-          const errData = await res.json();
-          errMsg = errData.error?.message || JSON.stringify(errData);
-        } catch (e) {
-          errMsg = await res.text();
-        }
-        console.warn(`[Google Social] HTTP ${res.status} for query: ${q}`);
-        console.warn(`[Google Social] Error Details: ${errMsg}`);
+        console.warn(`[Tavily] HTTP ${res.status} for query: ${query}`);
+        console.warn(`[Tavily] Error Details: ${await res.text()}`);
         continue;
       }
       const data = await res.json();
-      for (const item of data.items || []) {
+      for (const item of data.results || []) {
+        if (!item.url?.includes(urlMustInclude)) continue;
         results.push({
           title: cleanText(item.title),
           company: source,
           location: 'Bangladesh (Social Post)',
           type: 'Social Circular',
           experience: 'See post',
-          skills: cleanText(item.snippet).slice(0, 100) + '...',
-          applyUrl: item.link,
+          skills: cleanText(item.content).slice(0, 100) + '...',
+          applyUrl: item.url,
           source: source,
-          postedDate: 'Recent',
+          postedDate: item.published_date || 'Recent',
         });
       }
     } catch (err) {
-      console.error(`[Google Social] Error for ${source}:`, err.message);
+      console.error(`[Tavily] Error for ${source}:`, err.message);
     }
   }
 
@@ -339,8 +348,7 @@ function buildDiscordPayload(jobs) {
 async function run() {
   console.log('--- Environment Check ---');
   console.log('DISCORD_WEBHOOK_URL: ' + (WEBHOOK_URL ? '✅ Set (length: ' + WEBHOOK_URL.length + ')' : '❌ NOT SET'));
-  console.log('GOOGLE_SEARCH_API_KEY: ' + (GOOGLE_API_KEY ? '✅ Set (ends with: ...' + GOOGLE_API_KEY.slice(-4) + ')' : '❌ NOT SET'));
-  console.log('GOOGLE_SEARCH_CX: ' + (GOOGLE_CX ? '✅ Set' : '❌ NOT SET'));
+  console.log('TAVILY_API_KEY: ' + (TAVILY_API_KEY ? '✅ Set (ends with: ...' + TAVILY_API_KEY.slice(-4) + ')' : '❌ NOT SET'));
   console.log('-------------------------');
 
   console.log('Fetching developer openings from all sources...');
@@ -348,7 +356,7 @@ async function run() {
   const [linkedInJobs, bdJobs, socialPosts, remoteJobs] = await Promise.all([
     fetchLinkedInJobs(),
     fetchBDTechJobs(),
-    fetchGoogleSocialPosts(),
+    fetchSocialPosts(),
     fetchRemoteJobs(),
   ]);
 
