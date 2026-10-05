@@ -329,6 +329,12 @@ function buildDiscordPayload(jobs) {
 }
 
 async function run() {
+  console.log('--- Environment Check ---');
+  console.log('DISCORD_WEBHOOK_URL: ' + (WEBHOOK_URL ? '✅ Set (length: ' + WEBHOOK_URL.length + ')' : '❌ NOT SET'));
+  console.log('GOOGLE_SEARCH_API_KEY: ' + (GOOGLE_API_KEY ? '✅ Set (starts with: ' + GOOGLE_API_KEY.substring(0, 5) + '...)' : '❌ NOT SET'));
+  console.log('GOOGLE_SEARCH_CX: ' + (GOOGLE_CX ? '✅ Set (value: ' + GOOGLE_CX + ')' : '❌ NOT SET'));
+  console.log('-------------------------');
+
   console.log('Fetching developer openings from all sources...');
 
   const [linkedInJobs, bdJobs, socialPosts, remoteJobs] = await Promise.all([
