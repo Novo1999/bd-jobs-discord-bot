@@ -5,14 +5,18 @@ Automated daily Discord notifier for Frontend and Full-Stack developer positions
 ## ✨ Features
 
 - **Daily Schedule:** Runs automatically every day at **7:00 PM BST** (13:00 UTC).
-- **Bangladesh Tech Job Feeds:** Aggregates live listings from BD tech portals, filtering for React, Next.js, TypeScript, MERN, and Full-Stack developer positions.
-- **Rich Discord Embeds:** Posts organized cards with company name, location, work type (Onsite/Hybrid/Remote), required tech stack, experience level, and direct application links.
+- **Multi-Source Scraping & Aggregation:**
+  - 🟢 **LinkedIn:** Direct scraping via public guest search (extracts live Frontend & Full-Stack postings without requiring login/cookies).
+  - 🔵 **BDTechJobs:** Live API integration for Dhaka tech firms (MERN, React, Next.js, Node.js).
+  - 🔷 **Facebook Groups & LinkedIn Posts:** Scrapes indexed social posts via Google Search.
+  - 🟣 **Worldwide Remote:** Remote developer circulars open to Asian/Worldwide applicants (Jobicy).
+- **Rich Discord Embeds:** Posts organized cards with company name, location, work type (Onsite/Hybrid/Remote), required tech stack, and direct apply links.
+- **Deduplication Engine:** Automatically cleans and removes duplicate job listings.
 - **One-Click Quick Search Links:** Pre-filtered links for the past 24 hours on:
   - LinkedIn (Frontend Bangladesh)
   - LinkedIn (Full-Stack Bangladesh)
   - Facebook TECH JOBS BD Community
   - Google Jobs Dhaka
-- **Zero Cost & Zero Hosting:** Uses GitHub Actions and native Node.js (no heavy dependencies).
 
 ---
 
@@ -30,7 +34,9 @@ Automated daily Discord notifier for Frontend and Full-Stack developer positions
 4. Set:
    - **Name:** `DISCORD_WEBHOOK_URL`
    - **Secret:** *[Paste your copied Discord Webhook URL]*
-5. Click **Add secret**.
+5. *(Optional)* To enable Google-indexed Facebook/LinkedIn post scraping:
+   - `GOOGLE_SEARCH_API_KEY`: Your free Google Custom Search API Key
+   - `GOOGLE_SEARCH_CX`: Your Custom Search Engine ID
 
 ---
 
