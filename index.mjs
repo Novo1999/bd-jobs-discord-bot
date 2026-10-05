@@ -179,7 +179,15 @@ async function fetchGoogleSocialPosts() {
       )}&dateRestrict=d2`;
       const res = await fetch(url);
       if (!res.ok) {
+        let errMsg = '';
+        try {
+          const errData = await res.json();
+          errMsg = errData.error?.message || JSON.stringify(errData);
+        } catch (e) {
+          errMsg = await res.text();
+        }
         console.warn(`[Google Social] HTTP ${res.status} for query: ${q}`);
+        console.warn(`[Google Social] Error Details: ${errMsg}`);
         continue;
       }
       const data = await res.json();
